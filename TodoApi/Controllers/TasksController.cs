@@ -1,74 +1,65 @@
 using System.Security.Claims;
-using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TodoApi.Data;
 using TodoApi.DTO;
-using TodoApi.Models;
+using TodoApi.Services;
 
 namespace TodoApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class TasksController : ControllerBase
+public class TasksController(ITaskService service) : ControllerBase
 {
-    private readonly TodoDbContext _context;
-    private readonly IMapper _mapper;
-    public TasksController(TodoDbContext context, IMapper mapper)
+
+    private int GetUserId()
     {
-        _context = context;
-        _mapper = mapper;
+        var strId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(strId) || !int.TryParse(strId, out var id))
+        {
+            throw new InvalidOperationException("The token has not contain a valid UserId.");
+        }
+        return id;
     }
-    
-    private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
     
     
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TaskItem>>> GetAll()
-    {
+    public async Task<ActionResult<IEnumerable<TaskReadDto>>> GetAll()
+    { 
         var userId = GetUserId();
-        var tasks = await _context.Tasks.Where(t => t.UserId == userId).ToListAsync();
-
-        return Ok(_mapper.Map<IEnumerable<TaskItem>>(tasks));
+        var task =  await service.GetAllAsync(userId);
+        return Ok(task);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TaskItem>> Get(int id)
+    public async Task<ActionResult<TaskReadDto>> Get(int id)
     {
         var userId = GetUserId();
-        var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
-        if(task == null) return NotFound();
-
-        return task;
+        var task = await service.GetTaskByIdAsync(id, userId);
+        if (task == null) return NotFound();
+        return Ok(task);
     }
+    
     [HttpPost]
     public async Task<ActionResult<TaskReadDto>> Create(TaskCreateDto dto)
     {
-        var task = _mapper.Map<TaskItem>(dto);
-        task.UserId = GetUserId();
-        _context.Tasks.Add(task);
-        await _context.SaveChangesAsync();
-        var readDto = _mapper.Map<TaskReadDto>(task);
+        if(!ModelState.IsValid) return BadRequest(ModelState);
+        
+        var userId = GetUserId();
+        var task = await service.CreateTaskAsync(dto, userId);
 
-        return CreatedAtAction(nameof(Get), new { id = task.Id }, readDto);
+        return CreatedAtAction(nameof(Get), new { id = task.Id }, task);
     }
 
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, TaskItem task)
+    public async Task<IActionResult> Update(int id, TaskUpdateDto dto)
     {
-        if (id != task.Id) return BadRequest();
-
         var userId = GetUserId();
-        var existingTask = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
-        if (existingTask == null) return NotFound();
-
-        existingTask.Title = task.Title;
-        existingTask.IsCompleted = task.IsCompleted;
-
-        await _context.SaveChangesAsync();
+        var task = await service.UpdateTaskAsync(id, dto, userId);
+        
+        if(task == false) return NotFound();
+        
         return NoContent();
     }
 
@@ -76,12 +67,9 @@ public class TasksController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var userId = GetUserId();
-        var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
-        if (task == null) return NotFound();
+        var task = await service.DeleteTaskAsync(id);
+        if(task == false) return NotFound();
 
-        _context.Tasks.Remove(task);
-        await _context.SaveChangesAsync();
         return NoContent();
     }
 

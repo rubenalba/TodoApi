@@ -10,5 +10,6 @@ public class MappingProfile : Profile
     {
         CreateMap<TaskItem, TaskReadDto>();
         CreateMap<TaskCreateDto, TaskItem>();
+        CreateMap<TaskUpdateDto, TaskItem>();
     }
 }
