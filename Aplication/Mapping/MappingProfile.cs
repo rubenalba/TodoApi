@@ -1,8 +1,8 @@
 using AutoMapper;
-using TodoApi.DTO;
-using TodoApi.Models;
+using Domain.DTOs;
+using Domain.Models;
 
-namespace TodoApi.Helpers;
+namespace Aplication.Mapping;
 
 public class MappingProfile : Profile
 {

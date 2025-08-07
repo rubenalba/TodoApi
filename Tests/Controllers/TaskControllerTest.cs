@@ -1,10 +1,11 @@
 using System.Security.Claims;
+using Aplication.Interfaces;
+using Domain.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using TodoApi.Controllers;
-using TodoApi.DTO;
-using TodoApi.Services;
+using WebApi.Controllers;
+
 
 namespace Test.Controllers;
 
@@ -150,7 +151,7 @@ public class TaskControllerTest
     {
         //Arrange
         var task = new TaskReadDto { Id = 1, Title = "Test", IsCompleted = false, CreatedAt = System.DateTime.UtcNow };
-        _service.Setup(s => s.DeleteTaskAsync(1)).ReturnsAsync(false);
+        _service.Setup(s => s.DeleteTaskAsync(1, 1)).ReturnsAsync(false);
         
         //Act
         var result = await _controller.Delete(1);
@@ -164,7 +165,7 @@ public class TaskControllerTest
     {
         //Arrange
         var task = new TaskReadDto { Id = 1, Title = "Test", IsCompleted = false, CreatedAt = System.DateTime.UtcNow };
-        _service.Setup(s => s.DeleteTaskAsync(1)).ReturnsAsync(true);
+        _service.Setup(s => s.DeleteTaskAsync(1, 1)).ReturnsAsync(true);
         
         //Act
         var result = await _controller.Delete(1);

@@ -1,16 +1,15 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Domain.DTOs;
+using Domain.Models;
+using Infraestructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TodoApi.Data;
-using TodoApi.DTO;
-using TodoApi.Models;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 
-
-namespace TodoApi.Controllers;
+namespace WebApi.Controllers;
 
 [ApiController]
 [Route("auth")]

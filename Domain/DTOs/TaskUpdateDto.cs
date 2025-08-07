@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TodoApi.DTO;
+namespace Domain.DTOs;
 
 public class TaskUpdateDto
 {

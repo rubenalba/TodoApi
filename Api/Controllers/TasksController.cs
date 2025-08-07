@@ -1,10 +1,10 @@
 using System.Security.Claims;
+using Aplication.Interfaces;
+using Domain.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TodoApi.DTO;
-using TodoApi.Services;
 
-namespace TodoApi.Controllers;
+namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -67,7 +67,8 @@ public class TasksController(ITaskService service) : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var task = await service.DeleteTaskAsync(id);
+        var userId = GetUserId();
+        var task = await service.DeleteTaskAsync(id, userId);
         if(task == false) return NotFound();
 
         return NoContent();

@@ -1,4 +1,4 @@
-namespace TodoApi.DTO;
+namespace Domain.DTOs;
 
 public class TaskReadDto
 {
