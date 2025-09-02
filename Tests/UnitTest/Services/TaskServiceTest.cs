@@ -5,14 +5,21 @@ using Domain.DTOs;
 using Domain.Models;
 using Moq;
 
-namespace Test.Services;
+namespace Test.UnitTest.Services;
 
+/// <summary>
+///     Unit tests for <see cref="TaskService"/>.
+///     Verifies the behavior of service methods including success and error cases.
+/// </summary>
 public class TaskServiceTest
 {
     private readonly Mock<ITaskRepository> _repository;
     private readonly Mock<IMapper> _mapper;
     private readonly TaskService _service;
 
+    /// <summary>
+    ///     Initializes mocks and the service under test.
+    /// </summary>
     public TaskServiceTest()
     {
         _repository = new Mock<ITaskRepository>();
@@ -20,6 +27,9 @@ public class TaskServiceTest
         _service = new TaskService(_repository.Object, _mapper.Object);
     }
 
+    /// <summary>
+    ///     GetAll shall return all tasks for a user.
+    /// </summary>
     [Fact]
     public async Task GetAll_ShallReturnAllTasks()
     {
@@ -37,9 +47,7 @@ public class TaskServiceTest
         };
 
         _repository.Setup(r => r.GetAllAsync(1)).ReturnsAsync(taskItems);
-
-        _mapper.Setup(m => m.Map<IEnumerable<TaskReadDto>>(taskItems))
-            .Returns(taskDtos);
+        _mapper.Setup(m => m.Map<IEnumerable<TaskReadDto>>(taskItems)).Returns(taskDtos);
 
         // Act
         var result = await _service.GetAllAsync(1);
@@ -53,142 +61,163 @@ public class TaskServiceTest
         _mapper.Verify(m => m.Map<IEnumerable<TaskReadDto>>(taskItems), Times.Once);
     }
 
+    /// <summary>
+    ///     GetTaskById shall return the task when it exists.
+    /// </summary>
     [Fact]
     public async Task GetTaskById_ShallReturnTaskById()
     {
         //Arrange
-        var taskItem = new TaskItem { Id = 1, Title = "Task 1",IsCompleted = false, CreatedAt = DateTime.UtcNow, UserId = 1};
-        var taskDto = new TaskReadDto { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow};
+        var taskItem = new TaskItem { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow, UserId = 1 };
+        var taskDto = new TaskReadDto { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow };
         const int userId = 1;
+
         _repository.Setup(r => r.GetByIdAsync(taskItem.Id, userId)).ReturnsAsync(taskItem);
         _mapper.Setup(m => m.Map<TaskReadDto>(taskItem)).Returns(taskDto);
-        
+
         //Act
         var result = await _service.GetTaskByIdAsync(taskItem.Id, userId);
-        
+
         //Assert
         Assert.NotNull(result);
         Assert.Equal(taskDto.Id, result.Id);
         Assert.Equal(taskDto.Title, result.Title);
-        
+
         _repository.Verify(r => r.GetByIdAsync(taskItem.Id, userId), Times.Once);
         _mapper.Verify(m => m.Map<TaskReadDto>(taskItem), Times.Once);
     }
 
+    /// <summary>
+    ///     GetTaskById shall return null when the task does not exist.
+    /// </summary>
     [Fact]
     public async Task GetTaskById_ShallReturnNull_WhenTaskIsNull()
     {
         //Arrange
-        var taskItem = new TaskItem { Id = 1, Title = "Task 1",IsCompleted = false, CreatedAt = DateTime.UtcNow};
+        var taskItem = new TaskItem { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow };
         _repository.Setup(r => r.GetByIdAsync(taskItem.Id, 4)).ReturnsAsync(taskItem);
-        
+
         //Act
         var result = await _service.GetTaskByIdAsync(taskItem.Id, 1);
-        
-        //Assert
-        Assert.Null(result);
-    }
-    
-    [Fact]
-    public async Task GetTaskById_ShallReturnNull_WhenUserIdIsDistinct()
-    {
-        //Arrange
-        var taskItem = new TaskItem { Id = 1, Title = "Task 1",IsCompleted = false, CreatedAt = DateTime.UtcNow, UserId = 1};
-        var taskDto = new TaskReadDto { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow};
-        const int userId = 1;
-        _repository.Setup(r => r.GetByIdAsync(taskItem.Id, 2)).ReturnsAsync(taskItem);
-        _mapper.Setup(m => m.Map<TaskReadDto>(taskItem)).Returns(taskDto);
-        
-        //Act
-        var result = await _service.GetTaskByIdAsync(taskItem.Id, 2);
-        
+
         //Assert
         Assert.Null(result);
     }
 
+    /// <summary>
+    ///     GetTaskById shall return null when the task belongs to a different user.
+    /// </summary>
+    [Fact]
+    public async Task GetTaskById_ShallReturnNull_WhenUserIdIsDistinct()
+    {
+        //Arrange
+        var taskItem = new TaskItem { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow, UserId = 1 };
+        var taskDto = new TaskReadDto { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow };
+        const int userId = 1;
+
+        _repository.Setup(r => r.GetByIdAsync(taskItem.Id, 2)).ReturnsAsync(taskItem);
+        _mapper.Setup(m => m.Map<TaskReadDto>(taskItem)).Returns(taskDto);
+
+        //Act
+        var result = await _service.GetTaskByIdAsync(taskItem.Id, 2);
+
+        //Assert
+        Assert.Null(result);
+    }
+
+    /// <summary>
+    ///     CreateTaskAsync shall create a new task.
+    /// </summary>
     [Fact]
     public async Task CreateTaskAsync_ShallCreateTask()
     {
         //Arrange
-        var taskDto = new TaskCreateDto { Title = "Task 1"};
-        var taskItem = new TaskItem { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow,  UserId = 1};
-        var taskReadDto = new TaskReadDto { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = taskItem.CreatedAt};
+        var taskDto = new TaskCreateDto { Title = "Task 1" };
+        var taskItem = new TaskItem { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow, UserId = 1 };
+        var taskReadDto = new TaskReadDto { Id = 1, Title = "Task 1", IsCompleted = false, CreatedAt = taskItem.CreatedAt };
         const int userId = 1;
-        
-        _mapper.Setup(m=> m.Map<TaskItem>(taskDto)).Returns(taskItem);
+
+        _mapper.Setup(m => m.Map<TaskItem>(taskDto)).Returns(taskItem);
         _repository.Setup(r => r.AddAsync(taskItem));
         _mapper.Setup(m => m.Map<TaskReadDto>(taskItem)).Returns(taskReadDto);
-        
+
         //Act
         var result = await _service.CreateTaskAsync(taskDto, userId);
-        
+
         //Assert
         Assert.NotNull(result);
         Assert.Equal(taskReadDto.Id, result.Id);
         Assert.Equal(taskDto.Title, result.Title);
         Assert.Equal(taskReadDto.IsCompleted, result.IsCompleted);
-        
-        _mapper.Verify(m=> m.Map<TaskItem>(taskDto), Times.Once);
+
+        _mapper.Verify(m => m.Map<TaskItem>(taskDto), Times.Once);
         _repository.Verify(r => r.AddAsync(taskItem), Times.Once);
         _repository.Verify(r => r.SaveChangesAsync(), Times.Once);
         _mapper.Verify(m => m.Map<TaskReadDto>(taskItem), Times.Once);
     }
 
+    /// <summary>
+    ///     UpdateTaskAsync shall update an existing task.
+    /// </summary>
     [Fact]
     public async Task UpdateTaskAsync_ShallUpdateTask()
     {
         //Arrange
         const int id = 1;
         const int userId = 1;
-        var taskItem = new  TaskItem { Id = id, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow, UserId = userId};
+        var taskItem = new TaskItem { Id = id, Title = "Task 1", IsCompleted = false, CreatedAt = DateTime.UtcNow, UserId = userId };
         var taskUpdateDto = new TaskUpdateDto { Title = "Task updated" };
+
         _repository.Setup(r => r.GetByIdAsync(id, userId)).ReturnsAsync(taskItem);
-        
+
         //Act
         var result = await _service.UpdateTaskAsync(id, taskUpdateDto, userId);
-       
+
         //Assert
         Assert.True(result);
         _repository.Verify(r => r.GetByIdAsync(id, userId), Times.Once);
         _mapper.Verify(m => m.Map(taskUpdateDto, taskItem), Times.Once);
+        _repository.Verify(r => r.UpdateAsync(taskItem), Times.Once);
         _repository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
+    /// <summary>
+    ///     UpdateTaskAsync shall return false when the task does not exist.
+    /// </summary>
     [Fact]
     public async Task UpdateTaskAsync_ShallReturnFalseIfTaskNull()
-    { 
+    {
         //Arrange
         const int taskId = 1;
         const int userId = 1;
         var updateDto = new TaskUpdateDto { Title = "Updated title" };
 
-        _repository
-            .Setup(r => r.GetByIdAsync(taskId, userId))
-            .ReturnsAsync((TaskItem?)null);
-        
+        _repository.Setup(r => r.GetByIdAsync(taskId, userId)).ReturnsAsync((TaskItem?)null);
+
         //Act
         var result = await _service.UpdateTaskAsync(taskId, updateDto, userId);
-        
+
         //Assert
         Assert.False(result);
         _repository.Verify(r => r.GetByIdAsync(taskId, userId), Times.Once);
         _mapper.Verify(m => m.Map(updateDto, It.IsAny<TaskItem>()), Times.Never);
+        _repository.Verify(r => r.UpdateAsync(It.IsAny<TaskItem>()), Times.Never);
         _repository.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
-    
+
+    /// <summary>
+    ///     UpdateTaskAsync shall return false when the userId does not match.
+    /// </summary>
     [Fact]
-    public async Task UpdateTaskAsync_WhenUserIdDoesNotMatch_ReturnsFalse()
+    public async Task UpdateTaskAsync_ShallReturnFalse_WhenUserIdDoesNotMatch()
     {
         // Arrange
         const int taskId = 1;
         const int userId = 1;
         var updateDto = new TaskUpdateDto { Title = "Updated title" };
-    
         var taskItem = new TaskItem { Id = taskId, UserId = 999 };
 
-        _repository
-            .Setup(r => r.GetByIdAsync(taskId, userId))
-            .ReturnsAsync(taskItem);
+        _repository.Setup(r => r.GetByIdAsync(taskId, userId)).ReturnsAsync(taskItem);
 
         // Act
         var result = await _service.UpdateTaskAsync(taskId, updateDto, userId);
@@ -197,45 +226,50 @@ public class TaskServiceTest
         Assert.False(result);
         _mapper.Verify(m => m.Map(It.IsAny<TaskUpdateDto>(), It.IsAny<TaskItem>()), Times.Never);
         _repository.Verify(r => r.SaveChangesAsync(), Times.Never);
+        _repository.Verify(r => r.UpdateAsync(taskItem), Times.Never);
     }
 
+    /// <summary>
+    ///     DeleteTaskAsync shall delete an existing task.
+    /// </summary>
     [Fact]
     public async Task DeleteTaskAsync_ShallDeleteTask()
     {
         //Arrange
         const int id = 1;
         const int userId = 1;
-        var  taskItem = new TaskItem { Id = id, Title = "Task 1" };
+        var taskItem = new TaskItem { Id = id, Title = "Task 1" };
+
         _repository.Setup(r => r.GetByIdAsync(id, userId)).ReturnsAsync(taskItem);
-        
+
         //Act
         var result = await _service.DeleteTaskAsync(id, userId);
-        
+
         //Assert
         Assert.True(result);
         _repository.Verify(r => r.GetByIdAsync(id, userId), Times.Once);
         _repository.Verify(r => r.DeleteAsync(taskItem), Times.Once);
         _repository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
-    
+
+    /// <summary>
+    ///     DeleteTaskAsync shall return false when the task does not exist.
+    /// </summary>
     [Fact]
     public async Task DeleteTaskAsync_ShallReturnFalseIfTaskNull()
     {
         //Arrange
         const int id = 1;
         const int userId = 1;
-        var  taskItem = new TaskItem { Id = id, Title = "Task 1" };
         _repository.Setup(r => r.GetByIdAsync(id, userId)).ReturnsAsync((TaskItem?)null);
-        
+
         //Act
         var result = await _service.DeleteTaskAsync(id, userId);
-        
+
         //Assert
         Assert.False(result);
         _repository.Verify(r => r.GetByIdAsync(id, userId), Times.Once);
-        _repository.Verify(r => r.DeleteAsync(taskItem), Times.Never);
+        _repository.Verify(r => r.DeleteAsync(It.IsAny<TaskItem>()), Times.Never);
         _repository.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
-
-    
 }

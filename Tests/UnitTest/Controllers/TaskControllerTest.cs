@@ -6,19 +6,26 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using WebApi.Controllers;
 
+namespace Test.UnitTest.Controllers;
 
-namespace Test.Controllers;
-
+/// <summary>
+///     Unit tests for <see cref="TasksController"/>.
+///     Verifies the behavior of each endpoint, including success and error cases.
+/// </summary>
 public class TaskControllerTest
 {
     private readonly Mock<ITaskService> _service;
     private readonly TasksController _controller;
     
+    /// <summary>
+    ///     Initializes a new instance of <see cref="TaskControllerTest"/>.
+    ///     Configures the mocked service and simulates a user with ID 1.
+    /// </summary>
     public TaskControllerTest()
     {
         _service = new Mock<ITaskService>();
         _controller = new TasksController(_service.Object);
-        // Simula un usuario con ID 1
+
         var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
             new Claim(ClaimTypes.NameIdentifier, "1")
@@ -30,8 +37,11 @@ public class TaskControllerTest
         };
     }
 
+    /// <summary>
+    ///     GetAll shall return OkObjectResult with a list of tasks.
+    /// </summary>
     [Fact]
-    public async Task GetAll_ReturnsOkResult_WithListOfTaskReadDto()
+    public async Task GetAll_ShallReturnOkResult_WithListOfTaskReadDto()
     {
         // Arrange
         var tasks = new List<TaskReadDto> {
@@ -48,9 +58,12 @@ public class TaskControllerTest
         var returnedTasks = Assert.IsAssignableFrom<IEnumerable<TaskReadDto>>(okResult.Value);
         Assert.Equal(2, returnedTasks.Count());
     }
-    
+
+    /// <summary>
+    ///     Get shall return NotFound when the task does not exist.
+    /// </summary>
     [Fact]
-    public async Task Get_ReturnsNotFound_WhenTaskDoesNotExist()
+    public async Task Get_ShallReturnNotFound_WhenTaskDoesNotExist()
     {
         // Arrange
         _service.Setup(s => s.GetTaskByIdAsync(42, 1)).ReturnsAsync((TaskReadDto)null);
@@ -62,8 +75,11 @@ public class TaskControllerTest
         Assert.IsType<NotFoundResult>(result.Result);
     }
 
+    /// <summary>
+    ///     Get shall return Ok with a specific task.
+    /// </summary>
     [Fact]
-    public async Task Get_ReturnsOk_WithTaskReadDto()
+    public async Task Get_ShallReturnOk_WithTaskReadDto()
     {
         // Arrange
         var dto = new TaskReadDto { Id = 5, Title = "Test", IsCompleted = false, CreatedAt = System.DateTime.UtcNow };
@@ -79,8 +95,11 @@ public class TaskControllerTest
         Assert.Equal("Test", returned.Title);
     }
 
+    /// <summary>
+    ///     Create shall return BadRequest when the model state is invalid.
+    /// </summary>
     [Fact]
-    public async Task Create_ReturnsBadRequest_WhenModelStateIsInvalid()
+    public async Task Create_ShallReturnBadRequest_WhenModelStateIsInvalid()
     {
         //Arrange
         var dto = new TaskCreateDto{Title = "A"};
@@ -95,6 +114,9 @@ public class TaskControllerTest
         Assert.True(modelState.ContainsKey("Title"));
     }
 
+    /// <summary>
+    ///     Create shall successfully create a new task.
+    /// </summary>
     [Fact]
     public async Task Create_ShallCreateTask()
     {
@@ -116,8 +138,11 @@ public class TaskControllerTest
         Assert.Equal("Nueva Tarea", returned.Title);
     }
 
+    /// <summary>
+    ///     Update shall return NotFound when the task does not exist.
+    /// </summary>
     [Fact]
-    public async Task Put_ReturnNotFound_WhenTaskDoesNotExist()
+    public async Task Update_ShallReturnNotFound_WhenTaskDoesNotExist()
     {
         //Arrange
         var task = new TaskUpdateDto{Title = "Tarea 1"};
@@ -130,8 +155,11 @@ public class TaskControllerTest
         Assert.IsType<NotFoundResult>(result);
     }
 
+    /// <summary>
+    ///     Update shall successfully update an existing task.
+    /// </summary>
     [Fact]
-    public async Task Put_UpdateTask_OnCall()
+    public async Task Update_ShallReturnNoContent_OnSuccess()
     {
         //Arrange
         var task = new TaskUpdateDto{Title = "Tarea 1"};
@@ -144,11 +172,13 @@ public class TaskControllerTest
         Assert.IsType<NoContentResult>(result);
     }
 
+    /// <summary>
+    ///     Delete shall return NotFound when the task does not exist.
+    /// </summary>
     [Fact]
-    public async Task Delete_ReturnNotFound_WhenTaskDoesNotExist()
+    public async Task Delete_ShallReturnNotFound_WhenTaskDoesNotExist()
     {
         //Arrange
-        var task = new TaskReadDto { Id = 1, Title = "Test", IsCompleted = false, CreatedAt = System.DateTime.UtcNow };
         _service.Setup(s => s.DeleteTaskAsync(1, 1)).ReturnsAsync(false);
         
         //Act
@@ -157,12 +187,14 @@ public class TaskControllerTest
         //Assert
         Assert.IsType<NotFoundResult>(result);
     }
-    
+
+    /// <summary>
+    ///     Delete shall successfully delete a task.
+    /// </summary>
     [Fact]
-    public async Task Delete_ReturnNoContent_WhenDeleteTask()
+    public async Task Delete_ShallReturnNoContent_OnSuccess()
     {
         //Arrange
-        var task = new TaskReadDto { Id = 1, Title = "Test", IsCompleted = false, CreatedAt = System.DateTime.UtcNow };
         _service.Setup(s => s.DeleteTaskAsync(1, 1)).ReturnsAsync(true);
         
         //Act
@@ -171,9 +203,12 @@ public class TaskControllerTest
         //Assert
         Assert.IsType<NoContentResult>(result);
     }
-    
+
+    /// <summary>
+    ///     GetAll shall throw InvalidOperationException when the user ID claim is missing.
+    /// </summary>
     [Fact]
-    public async Task GetAll_ThrowsInvalidOperationException_WhenUserIdClaimMissing()
+    public async Task GetAll_ShallThrowInvalidOperationException_WhenUserIdClaimMissing()
     {
         //Arrange
         var userWithoutClaim = new ClaimsPrincipal(new ClaimsIdentity()); // sin claims
@@ -185,5 +220,4 @@ public class TaskControllerTest
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() => _controller.GetAll());
     }
-
 }
