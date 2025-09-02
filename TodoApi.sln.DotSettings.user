@@ -30,7 +30,11 @@
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=dde1e9b6_002Df03c_002D4eb5_002D9345_002D866a7b22ae62/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TaskServiceTest #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::6954C382-7AF8-466C-B5EA-729E190E769B::net8.0::Test.UnitTest.Services.TaskServiceTest&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
+  &lt;Or&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;xUnit::6954C382-7AF8-466C-B5EA-729E190E769B::net8.0::Test.UnitTest.Services.TaskServiceTest&lt;/TestId&gt;
+      &lt;TestId&gt;xUnit::6954C382-7AF8-466C-B5EA-729E190E769B::net8.0::Test.UnitTest.Controllers.TaskControllerTest&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+    &lt;ProjectFolder&gt;6954C382-7AF8-466C-B5EA-729E190E769B/d:IntegrationTest&lt;/ProjectFolder&gt;
+  &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
