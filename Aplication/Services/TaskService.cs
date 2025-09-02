@@ -44,7 +44,10 @@ public class TaskService : ITaskService
     public async Task<bool> UpdateTaskAsync(int id, TaskUpdateDto taskDto, int userId)
     {
         var task = await _repository.GetByIdAsync(id, userId);
-        if (task == null || task.UserId != userId) return await Task.FromResult(false);
+        if (task == null || task.UserId != userId)
+        {
+            return await Task.FromResult(false);
+        }
         _mapper.Map(taskDto, task);
         await _repository.SaveChangesAsync();
         return true;
@@ -53,7 +56,10 @@ public class TaskService : ITaskService
     public async Task<bool> DeleteTaskAsync(int id, int userId)
     {
         var task = await _repository.GetByIdAsync(id, userId);
-        if (task == null) return await Task.FromResult(false);
+        if (task == null)
+        {
+            return await Task.FromResult(false);
+        }
         await _repository.DeleteAsync(task);
         await _repository.SaveChangesAsync();
         return await Task.FromResult(true);

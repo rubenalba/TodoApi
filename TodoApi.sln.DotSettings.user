@@ -12,5 +12,10 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a8f010ca_002D3e9c_002D419d_002D8421_002D1bcd7d466378/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="GetTaskById" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;xUnit::6954C382-7AF8-466C-B5EA-729E190E769B::net8.0::Test.Controllers.TaskControllerTest&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::6954C382-7AF8-466C-B5EA-729E190E769B::net8.0::Test.Services.TaskServiceTest.GetAll_ShallReturnAllTasks&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::6954C382-7AF8-466C-B5EA-729E190E769B::net8.0::Test.Services.TaskServiceTest.GetTaskById_ShallReturnTaskById&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::6954C382-7AF8-466C-B5EA-729E190E769B::net8.0::Test.Services.TaskServiceTest.GetTaskById_ShallReturnNull_WhenTaskOrUserIsNull&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::6954C382-7AF8-466C-B5EA-729E190E769B::net8.0::Test.Services.TaskServiceTest.GetTaskById_ShallReturnNull_WhenUserIdIsDistinct&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::6954C382-7AF8-466C-B5EA-729E190E769B::net8.0::Test.Services.TaskServiceTest&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
