@@ -1,13 +1,17 @@
-# Ignorar carpeta completa de IDEA
+# Ignore IntelliJ IDEA configuration folder
 .idea/
 
-# Otras reglas que tenías
-/shelf/
-/workspace.xml
+# IDEA project-specific files
 .idea.TodoApi.iml
 /modules.xml
 /projectSettingsUpdater.xml
 /contentModel.xml
+
+# Workspace and local shelves
+/workspace.xml
+/shelf/
+
+# HTTP requests and data sources
 /httpRequests/
 /dataSources/
 /dataSources.local.xml
